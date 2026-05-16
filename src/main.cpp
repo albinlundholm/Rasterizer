@@ -12,14 +12,24 @@ int main() {
 
     uint32_t *frame_buffer = (uint32_t *)malloc(WINDOW_WIDTH*WINDOW_HEIGHT*sizeof(uint32_t));
 
-    mfb_update_state state;
-    do {
-        
-        for (size_t i = 0; i < WINDOW_WIDTH*WINDOW_HEIGHT; i++)
+    // Fill framebuffer with gradient
+    uint32_t color;
+    for (size_t i = 0; i < WINDOW_WIDTH*WINDOW_HEIGHT; i++)
         {
-            frame_buffer[i] = 0x00FF0000;
+            int x = i % WINDOW_WIDTH;
+            int y = i / WINDOW_WIDTH;
+            uint8_t R = (x * 255) / WINDOW_WIDTH;
+            uint8_t G = (y * 255) / WINDOW_HEIGHT;
+            uint8_t B = 0x00;
+            color = 0x00000000 | (R << 16) | (G << 8) | B;
+            frame_buffer[i] = color;
         }
-        
+    std::cout << std::hex << "Color: " << color << std::endl;
+
+
+
+    mfb_update_state state;
+    do {        
         state = mfb_update_ex(window, frame_buffer, WINDOW_WIDTH, WINDOW_HEIGHT);
 
         if (state != MFB_STATE_OK)
