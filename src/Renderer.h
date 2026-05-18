@@ -4,4 +4,6 @@
 
 void draw_line(uint32_t *frame_buffer, int frame_width, Vec2 start, Vec2 end, uint32_t color);
 
-void draw_filled_triangle(uint32_t *frame_buffer, int frame_width, Vec2 point_0, Vec2 point_1, Vec2 point_2, uint32_t color);
+void draw_filled_triangle(uint32_t *frame_buffer, int frame_width, Vec2 p0, Vec2 p1, Vec2 p2, uint32_t c);
+
+void draw_shaded_triangle(uint32_t *frame_buffer, int frame_width, Vec2 v0, Vec2 v1, Vec2 v2, uint32_t c0, uint32_t c1, uint32_t c2);
