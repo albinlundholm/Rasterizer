@@ -1,11 +1,15 @@
 #include <iostream>
 #include <MiniFB.h>
+#include <cfloat>
 
 #include "Vec2.h"
 #include "Renderer.h"
 
 uint32_t WINDOW_WIDTH = 800;
 uint32_t WINDOW_HEIGHT = 600;
+
+uint32_t BACKGROUND_COLOR = 0x00000000;
+
 char *DISPLAY_NAME = "RASTERIZER";
 
 
@@ -13,22 +17,22 @@ int main() {
     struct mfb_window *window = mfb_open_ex(DISPLAY_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, MFB_WF_RESIZABLE);
 
     // Init frame buffer
-    uint32_t *frame_buffer = (uint32_t *)malloc(WINDOW_WIDTH*WINDOW_HEIGHT*sizeof(uint32_t));
-    uint32_t background_color = 0x00000000;
+    uint32_t *frame_buffer = (uint32_t *)malloc(WINDOW_WIDTH*WINDOW_HEIGHT*sizeof(uint32_t)); 
     for (size_t i = 0; i < WINDOW_WIDTH*WINDOW_HEIGHT; i++)
         {
-            frame_buffer[i] = background_color;
+            frame_buffer[i] = BACKGROUND_COLOR;
         }
 
-    // Testing drawing filled triangle
-    // draw_filled_triangle(frame_buffer, WINDOW_WIDTH, {100, 50},  {300, 250}, {50,  250}, 0x00FF0000); // red
-    // draw_filled_triangle(frame_buffer, WINDOW_WIDTH, {350, 50},  {550, 250}, {400, 250}, 0x0000FF00); // green
-    // draw_filled_triangle(frame_buffer, WINDOW_WIDTH, {600, 50},  {780, 250}, {620, 250}, 0x000000FF); // blue
-    // draw_filled_triangle(frame_buffer, WINDOW_WIDTH, {100, 350}, {300, 550}, {200, 300}, 0x00FFFF00); // yellow
-    // draw_filled_triangle(frame_buffer, WINDOW_WIDTH, {400, 300}, {600, 500}, {500, 300}, 0x00FF00FF); // magenta
+    // Init depth buffer
+    float *depth_buffer = (float *)malloc(WINDOW_WIDTH*WINDOW_HEIGHT*sizeof(float));
+    for (size_t i = 0; i < WINDOW_WIDTH*WINDOW_HEIGHT; i++)
+        {
+            depth_buffer[i] = FLT_MAX;
+        }
 
-    // Test interpolated triangle
-    draw_shaded_triangle(frame_buffer, WINDOW_WIDTH, {400, 100}, {100, 500}, {700, 300}, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    // Test interpolated triangle and z buffer
+    draw_shaded_triangle(frame_buffer, depth_buffer, WINDOW_WIDTH, {250, 150, 1}, {550, 150, 1}, {400, 450, 1}, 0x00FFFFFF, 0x00FFFFFF, 0x00FFFFFF);
+    draw_shaded_triangle(frame_buffer, depth_buffer, WINDOW_WIDTH, {400, 100, 0}, {100, 500, 0}, {700, 300, 0}, 0x00FF0000, 0x0000FF00, 0x000000FF);
 
     // Main loop
     mfb_update_state state;

@@ -74,13 +74,18 @@ void draw_filled_triangle(uint32_t *frame_buffer, int frame_width, Vec2 p0, Vec2
     }
 }
 
-void draw_shaded_triangle(uint32_t *frame_buffer, int frame_width, Vec2 v0, Vec2 v1, Vec2 v2, uint32_t c0, uint32_t c1, uint32_t c2)
+void draw_shaded_triangle(uint32_t *frame_buffer, float * depth_buffer,  int frame_width, Vec3 v0, Vec3 v1, Vec3 v2, uint32_t c0, uint32_t c1, uint32_t c2)
 {   
     // Get triangle bounding box
     float x_min = std::min({v0.x, v1.x, v2.x});
     float x_max = std::max({v0.x, v1.x, v2.x});
     float y_min = std::min({v0.y, v1.y, v2.y});
     float y_max = std::max({v0.y, v1.y, v2.y});
+
+    // Flatten vectors to 2D
+    Vec2 v2_0 = {v0.x, v0.y};
+    Vec2 v2_1 = {v1.x, v1.y};
+    Vec2 v2_2 = {v2.x, v2.y};
 
     // Unpack colors to be blended later
     uint8_t r0 = (c0 >> 16) & 0xFF;
@@ -93,23 +98,30 @@ void draw_shaded_triangle(uint32_t *frame_buffer, int frame_width, Vec2 v0, Vec2
     uint8_t g2 = (c2 >> 8)  & 0xFF;
     uint8_t b2 = (c2)       & 0xFF;
 
+    float denom = (v2_1-v2_0).cross(v2_2-v2_0);
+    
     for (int y = (int)y_min; y <= (int)y_max; y++)
     {
         for (int x = (int)x_min; x <= (int)x_max; x++)
         {
             // Find barycentric coords for point to interpolate color
             Vec2 P = {(float)x, (float)y};
-            float denom = (v1-v0).cross(v2-v0);
-            float u = (v1-v0).cross(P-v0) / denom;
-            float v = (P-v0).cross(v2-v0) / denom;
+            float u = (v2_1-v2_0).cross(P-v2_0) / denom;
+            float v = (P-v2_0).cross(v2_2-v2_0) / denom;
             float w = 1 - u - v;
 
-            if (u >= 0 && v >= 0 && w >= 0){
-                uint8_t r = (uint8_t)(u*r0 + v*r1 + w*r2);
-                uint8_t g = (uint8_t)(u*g0 + v*g1 + w*g2);
-                uint8_t b = (uint8_t)(u*b0 + v*b1 + w*b2);
-                uint32_t blended = (r << 16) | (g << 8) | b;
-                frame_buffer[(size_t)y * frame_width + x] = blended;
+            float z = u * v0.z + v * v1.z + w * v2.z;
+
+            if (z < depth_buffer[(size_t)y * frame_width + x])
+            {
+                if (u >= 0 && v >= 0 && w >= 0){
+                    uint8_t r = (uint8_t)(u*r0 + v*r1 + w*r2);
+                    uint8_t g = (uint8_t)(u*g0 + v*g1 + w*g2);
+                    uint8_t b = (uint8_t)(u*b0 + v*b1 + w*b2);
+                    uint32_t blended = (r << 16) | (g << 8) | b;
+                    frame_buffer[(size_t)y * frame_width + x] = blended;
+                    depth_buffer[(size_t)y * frame_width + x] = z;
+                }
             }
         }
     }
