@@ -4,7 +4,7 @@
 
 struct Face
 {
-    int x, y, z;
+    int v0, v1, v2;
 };
 
 struct Mesh

@@ -3,7 +3,7 @@
 #include "Vec3.h"
 #include <cstdint>
 
-void draw_line(uint32_t *frame_buffer, int frame_width, Vec2 start, Vec2 end, uint32_t color);
+void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 start, Vec2 end, uint32_t color);
 
 void draw_filled_triangle(uint32_t *frame_buffer, int frame_width, Vec2 p0, Vec2 p1, Vec2 p2, uint32_t c);
 

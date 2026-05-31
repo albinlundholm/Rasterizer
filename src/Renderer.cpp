@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-void draw_line(uint32_t *frame_buffer, int frame_width, Vec2 start, Vec2 end, uint32_t color)
+void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 start, Vec2 end, uint32_t color)
 {
     const float dx = end.x - start.x;
     const float dy = end.y - start.y;
@@ -14,6 +14,9 @@ void draw_line(uint32_t *frame_buffer, int frame_width, Vec2 start, Vec2 end, ui
         for (int x = (int)start.x; x != (int)end.x; x += x_step)
         {
             float y = dy/dx * (x - start.x) + start.y;
+            int px = x;
+            int py = (int)round(y);
+            if (px < 0 || px >= frame_width || py < 0 || py >= frame_height) continue;
             frame_buffer[(int)round(y) * frame_width + x] = color;
         }
         
@@ -23,6 +26,9 @@ void draw_line(uint32_t *frame_buffer, int frame_width, Vec2 start, Vec2 end, ui
         for (int y = (int)start.y; y != (int)end.y; y += y_step)
         {
             float x = dx/dy * (y - start.y) + start.x;
+            int px = (int)round(x);
+            int py = y;
+            if (px < 0 || px >= frame_width || py < 0 || py >= frame_height) continue;
             frame_buffer[y * frame_width + (int)round(x)] = color;
         }
     }
