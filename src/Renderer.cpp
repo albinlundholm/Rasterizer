@@ -1,6 +1,10 @@
-#include "Renderer.h"
 #include <algorithm>
 #include <cmath>
+
+#include "Renderer.h"
+#include "Texture.h"
+#include "Vec2.h"
+#include "Vec3.h"
 
 void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 start, Vec2 end, uint32_t color)
 {
@@ -17,7 +21,7 @@ void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 s
             int px = x;
             int py = (int)round(y);
             if (px < 0 || px >= frame_width || py < 0 || py >= frame_height) continue;
-            frame_buffer[(int)round(y) * frame_width + x] = color;
+            frame_buffer[py * frame_width + px] = color;
         }
         
     } else {
@@ -29,7 +33,7 @@ void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 s
             int px = (int)round(x);
             int py = y;
             if (px < 0 || px >= frame_width || py < 0 || py >= frame_height) continue;
-            frame_buffer[y * frame_width + (int)round(x)] = color;
+            frame_buffer[py * frame_width + px] = color;
         }
     }
 }
@@ -80,13 +84,19 @@ void draw_filled_triangle(uint32_t *frame_buffer, int frame_width, Vec2 p0, Vec2
     }
 }
 
-void draw_shaded_triangle(uint32_t *frame_buffer, float * depth_buffer,  int frame_width, Vec3 v0, Vec3 v1, Vec3 v2, uint32_t c0, uint32_t c1, uint32_t c2)
+void draw_shaded_triangle(uint32_t *frame_buffer, float * depth_buffer, int frame_width, int frame_height, Vec3 v0, Vec3 v1, Vec3 v2, uint32_t c0, uint32_t c1, uint32_t c2)
 {   
     // Get triangle bounding box
     float x_min = std::min({v0.x, v1.x, v2.x});
     float x_max = std::max({v0.x, v1.x, v2.x});
     float y_min = std::min({v0.y, v1.y, v2.y});
     float y_max = std::max({v0.y, v1.y, v2.y});
+
+    // Clamp to screen
+    x_min = std::max(x_min, 0.0f);
+    x_max = std::min(x_max, (float)(frame_width - 1));
+    y_min = std::max(y_min, 0.0f);
+    y_max = std::min(y_max, (float)(frame_height - 1));
 
     // Flatten vectors to 2D
     Vec2 v2_0 = {v0.x, v0.y};
@@ -126,6 +136,61 @@ void draw_shaded_triangle(uint32_t *frame_buffer, float * depth_buffer,  int fra
                     uint8_t b = (uint8_t)(u*b0 + v*b1 + w*b2);
                     uint32_t blended = (r << 16) | (g << 8) | b;
                     frame_buffer[(size_t)y * frame_width + x] = blended;
+                    depth_buffer[(size_t)y * frame_width + x] = z;
+                }
+            }
+        }
+    }
+}
+
+void draw_textured_triangle(uint32_t *frame_buffer, float *depth_buffer, int frame_width, int frame_height, Vec3 v0, Vec3 v1, Vec3 v2, Vec2 uv0, Vec2 uv1, Vec2 uv2, Texture texture)
+{
+    // Get triangle bounding box
+    float x_min = std::min({v0.x, v1.x, v2.x});
+    float x_max = std::max({v0.x, v1.x, v2.x});
+    float y_min = std::min({v0.y, v1.y, v2.y});
+    float y_max = std::max({v0.y, v1.y, v2.y});
+
+    // Clamp to screen
+    x_min = std::max(x_min, 0.0f);
+    x_max = std::min(x_max, (float)(frame_width - 1));
+    y_min = std::max(y_min, 0.0f);
+    y_max = std::min(y_max, (float)(frame_height - 1));
+
+
+    // Flatten vectors to 2D
+    Vec2 v2_0 = {v0.x, v0.y};
+    Vec2 v2_1 = {v1.x, v1.y};
+    Vec2 v2_2 = {v2.x, v2.y};
+
+    float denom = (v2_1-v2_0).cross(v2_2-v2_0);
+    
+    if (denom <= 0) return;
+
+    for (int y = (int)y_min; y <= (int)y_max; y++)
+    {
+        for (int x = (int)x_min; x <= (int)x_max; x++)
+        {
+            // Find barycentric coords for point
+            Vec2 P = {(float)x, (float)y};
+            float u = (v2_1-v2_0).cross(P-v2_0) / denom;
+            float v = (P-v2_0).cross(v2_2-v2_0) / denom;
+            float w = 1 - u - v;
+
+            float z = u * v0.z + v * v1.z + w * v2.z;
+
+            if (u >= 0 && v >= 0 && w >= 0)
+            {
+                if (z < depth_buffer[(size_t)y * frame_width + x]){
+                    float tex_u = u * uv0.x + v * uv1.x + w * uv2.x;
+                    float tex_v = u * uv0.y + v * uv1.y + w * uv2.y;
+
+                    int tx = (int)(tex_u * texture.width);
+                    int ty = (int)(tex_v * texture.height);
+
+                    if (tx < 0 || tx >= texture.width || ty < 0 || ty >= texture.height) continue;
+
+                    frame_buffer[(size_t)y * frame_width + x] = texture.pixels[(int)ty * texture.width + (int)tx];
                     depth_buffer[(size_t)y * frame_width + x] = z;
                 }
             }

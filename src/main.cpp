@@ -6,9 +6,10 @@
 #include "Mesh.h"
 #include "Renderer.h"
 #include "ObjLoader.h"
+#include "TgaLoader.h"
 
-uint32_t FRAME_WIDTH = 800;
-uint32_t FRAME_HEIGHT = 600;
+uint32_t FRAME_WIDTH = 1920;
+uint32_t FRAME_HEIGHT = 1080;
 
 uint32_t BACKGROUND_COLOR = 0x00000000;
 
@@ -34,24 +35,37 @@ int main(int arg_c, char **arg_v) {
 
     // Test load and draw obj wireframe
     Mesh obj = load_obj(arg_v[1]);
-    
+    Texture tex;
+
+    try {
+            tex = load_tga(arg_v[2]);
+        } catch (std::exception& e) {
+            printf("%s\n", e.what());
+        }
+
     for (size_t i = 0; i < obj.f_count; i++)
     {
-        float screen_x = (obj.vertices[obj.faces[i].v0].x + 1) / 2 * FRAME_WIDTH;
-        float screen_y = (1 - (obj.vertices[obj.faces[i].v0].y + 1) / 2) * FRAME_HEIGHT;
-        Vec2 v0 = {screen_x, screen_y};
+        auto project = [&](Vec3 v) -> Vec3 {
+            float sx = (v.x + 1) / 2 * FRAME_WIDTH;
+            float sy = (1 - (v.y + 1) / 2) * FRAME_HEIGHT;
+            return {sx, sy, -v.z};
+        };
 
-        screen_x = (obj.vertices[obj.faces[i].v1].x + 1) / 2 * FRAME_WIDTH;
-        screen_y = (1 - (obj.vertices[obj.faces[i].v1].y + 1) / 2) * FRAME_HEIGHT;
-        Vec2 v1 = {screen_x, screen_y};
+        Vec3 a = obj.vertices[obj.faces[i].v0];
+        Vec3 b = obj.vertices[obj.faces[i].v1];
+        Vec3 c = obj.vertices[obj.faces[i].v2];
 
-        screen_x = (obj.vertices[obj.faces[i].v2].x + 1) / 2 * FRAME_WIDTH;
-        screen_y = (1 - (obj.vertices[obj.faces[i].v2].y + 1) / 2) * FRAME_HEIGHT;
-        Vec2 v2 = {screen_x, screen_y};
+        Vec3 v0 = project(a);
+        Vec3 v1 = project(b);
+        Vec3 v2 = project(c);
+
+        Vec2 uv0 = obj.UV_coords[obj.UV_faces[i].v0];
+        Vec2 uv1 = obj.UV_coords[obj.UV_faces[i].v1];
+        Vec2 uv2 = obj.UV_coords[obj.UV_faces[i].v2];
         
-        draw_line(frame_buffer, FRAME_WIDTH, FRAME_HEIGHT, v0, v1, 0x00FFFFFF);
-        draw_line(frame_buffer, FRAME_WIDTH, FRAME_HEIGHT, v1, v2, 0x00FFFFFF);
-        draw_line(frame_buffer, FRAME_WIDTH, FRAME_HEIGHT, v2, v0, 0x00FFFFFF);
+        // Switched input order of vertices to get correct vertex winding because screen space Y is pointing down, mirroring winding
+        // Revert to original order when viewport transform is implemented, where we'll flip Y
+        draw_textured_triangle(frame_buffer, depth_buffer, FRAME_WIDTH, FRAME_HEIGHT, v2, v1, v0, uv0, uv1, uv2, tex);
     }
     
 

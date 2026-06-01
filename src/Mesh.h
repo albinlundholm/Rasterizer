@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vec2.h"
 #include "Vec3.h"
 
 struct Face
@@ -10,7 +11,13 @@ struct Face
 struct Mesh
 {
     Vec3 *vertices;
-    Face *faces;
     int v_count;
+    
+    Face *faces;
     int f_count;
+
+    Vec2 *UV_coords;
+    int UV_count;
+
+    Face *UV_faces;
 };
