@@ -3,6 +3,9 @@
 #include <cfloat>
 
 #include "Vec2.h"
+#include "Vec3.h"
+#include "Vec4.h"
+#include "Mat4.h"
 #include "Mesh.h"
 #include "Renderer.h"
 #include "ObjLoader.h"
@@ -46,14 +49,25 @@ int main(int arg_c, char **arg_v) {
     for (size_t i = 0; i < obj.f_count; i++)
     {
         auto project = [&](Vec3 v) -> Vec3 {
-            float sx = (v.x + 1) / 2 * FRAME_WIDTH;
-            float sy = (1 - (v.y + 1) / 2) * FRAME_HEIGHT;
+            float scale = (1 / (1 - v.z / 3));
+            float sx = (v.x * scale + 1) / 2 * FRAME_WIDTH;
+            float sy = (1 - (v.y * scale + 1) / 2) * FRAME_HEIGHT;
             return {sx, sy, -v.z};
         };
 
-        Vec3 a = obj.vertices[obj.faces[i].v0];
-        Vec3 b = obj.vertices[obj.faces[i].v1];
-        Vec3 c = obj.vertices[obj.faces[i].v2];
+        Vec4 a4 = {obj.vertices[obj.faces[i].v0].x, obj.vertices[obj.faces[i].v0].y, obj.vertices[obj.faces[i].v0].z, 1};
+        Vec4 b4 = {obj.vertices[obj.faces[i].v1].x, obj.vertices[obj.faces[i].v1].y, obj.vertices[obj.faces[i].v1].z, 1};
+        Vec4 c4 = {obj.vertices[obj.faces[i].v2].x, obj.vertices[obj.faces[i].v2].y, obj.vertices[obj.faces[i].v2].z, 1};
+
+        float angle = -(3.14159f / 4.0f); //45 degrees as radians
+
+        a4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * a4;
+        b4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * b4;
+        c4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * c4;
+
+        Vec3 a = {a4.x, a4.y, a4.z};
+        Vec3 b = {b4.x, b4.y, b4.z};
+        Vec3 c = {c4.x, c4.y, c4.z};
 
         Vec3 v0 = project(a);
         Vec3 v1 = project(b);
