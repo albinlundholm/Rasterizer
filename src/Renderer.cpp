@@ -11,7 +11,7 @@ void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 s
     const float dx = end.x - start.x;
     const float dy = end.y - start.y;
 
-    if (abs(dx) >= abs(dy)) {
+    if (std::abs(dx) >= std::abs(dy)) {
         // Step along x
         // y = kx + m
         const int x_step = (dx > 0) ? 1 : -1;

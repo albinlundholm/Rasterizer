@@ -1,6 +1,6 @@
-#include <iostream>
 #include <MiniFB.h>
 #include <cfloat>
+#include <cstdio>
 
 #include "Vec2.h"
 #include "Vec3.h"
@@ -16,7 +16,7 @@ uint32_t FRAME_HEIGHT = 1080;
 
 uint32_t BACKGROUND_COLOR = 0x00000000;
 
-char *DISPLAY_NAME = "RASTERIZER";
+const char *DISPLAY_NAME = "RASTERIZER";
 
 
 int main(int arg_c, char **arg_v) {

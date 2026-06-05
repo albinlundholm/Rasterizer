@@ -2,7 +2,6 @@
 #include "Texture.h"
 
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 
 Texture load_tga(char *path)

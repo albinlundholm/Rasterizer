@@ -19,30 +19,30 @@ struct Mat4 {
     static Mat4 rotation_x(float angle)
     {
         return {{
-            { 1,           0,           0,  0 },
-            { 0,  cos(angle), -sin(angle),  0 },
-            { 0,  sin(angle),  cos(angle),  0 },
-            { 0,           0,           0,  1 }
+            { 1,                  0,                  0,  0 },
+            { 0,  std::cosf(angle), -std::sinf(angle),  0 },
+            { 0,  std::sinf(angle),  std::cosf(angle),  0 },
+            { 0,                  0,                  0,  1 }
         }};
     }
 
     static Mat4 rotation_y(float angle)
     {
         return {{
-            {  cos(angle),  0,  sin(angle),  0 },
-            {           0,  1,           0,  0 },
-            { -sin(angle),  0,  cos(angle),  0 },
-            {           0,  0,           0,  1 }
+            {  std::cosf(angle),  0,  std::sinf(angle),  0 },
+            {                 0,  1,                  0,  0 },
+            { -std::sinf(angle),  0,  std::cosf(angle),  0 },
+            {                 0,  0,                  0,  1 }
         }};
     }
 
     static Mat4 rotation_z(float angle)
     {
         return {{
-            {  cos(angle), -sin(angle),  0,  0 },
-            {  sin(angle),  cos(angle),  0,  0 },
-            {           0,           0,  1,  0 },
-            {           0,           0,  0,  1 }
+            {  std::cosf(angle), -std::sinf(angle),  0,  0 },
+            {  std::sinf(angle),  std::cosf(angle),  0,  0 },
+            {                 0,                  0,  1,  0 },
+            {                 0,                  0,  0,  1 }
         }};
     }
 
