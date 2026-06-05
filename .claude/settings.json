@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/**)",
-      "Read(//c/Program Files/Microsoft Visual Studio/**)",
-      "WebFetch(domain:haqr.eu)"
-    ]
-  }
-}
