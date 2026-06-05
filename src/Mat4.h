@@ -18,31 +18,34 @@ struct Mat4 {
 
     static Mat4 rotation_x(float angle)
     {
+        float c = (float)std::cos(angle), s = (float)std::sin(angle);
         return {{
-            { 1,                  0,                  0,  0 },
-            { 0,  std::cosf(angle), -std::sinf(angle),  0 },
-            { 0,  std::sinf(angle),  std::cosf(angle),  0 },
-            { 0,                  0,                  0,  1 }
+            { 1,  0,   0,  0 },
+            { 0,  c,  -s,  0 },
+            { 0,  s,   c,  0 },
+            { 0,  0,   0,  1 }
         }};
     }
 
     static Mat4 rotation_y(float angle)
     {
+        float c = (float)std::cos(angle), s = (float)std::sin(angle);
         return {{
-            {  std::cosf(angle),  0,  std::sinf(angle),  0 },
-            {                 0,  1,                  0,  0 },
-            { -std::sinf(angle),  0,  std::cosf(angle),  0 },
-            {                 0,  0,                  0,  1 }
+            {  c,  0,  s,  0 },
+            {  0,  1,  0,  0 },
+            { -s,  0,  c,  0 },
+            {  0,  0,  0,  1 }
         }};
     }
 
     static Mat4 rotation_z(float angle)
     {
+        float c = (float)std::cos(angle), s = (float)std::sin(angle);
         return {{
-            {  std::cosf(angle), -std::sinf(angle),  0,  0 },
-            {  std::sinf(angle),  std::cosf(angle),  0,  0 },
-            {                 0,                  0,  1,  0 },
-            {                 0,                  0,  0,  1 }
+            {  c, -s,  0,  0 },
+            {  s,  c,  0,  0 },
+            {  0,  0,  1,  0 },
+            {  0,  0,  0,  1 }
         }};
     }
 
