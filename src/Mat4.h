@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <cstdint>
 #include "Vec4.h"
 
 struct Mat4 {
@@ -46,6 +47,32 @@ struct Mat4 {
             {  s,  c,  0,  0 },
             {  0,  0,  1,  0 },
             {  0,  0,  0,  1 }
+        }};
+    }
+
+    static Mat4 viewport(uint32_t width, uint32_t height)
+    {
+        /*
+            x: width/2 * x + width/2
+            y: -height/2 * y + height/2
+        */
+        float w = (float)width/2;
+        float h = (float)height/2;
+        return {{
+            {  w,  0,  0,  w },
+            {  0, -h,  0,  h },
+            {  0,  0,  1,  0 },
+            {  0,  0,  0,  1 }
+        }};
+    }
+
+    static Mat4 perspective(float c)
+    {
+        return {{
+            {  1,  0,   0,  0 },
+            {  0,  1,   0,  0 },
+            {  0,  0,   1,  0 },
+            {  0,  0,-1/c,  1 }
         }};
     }
 

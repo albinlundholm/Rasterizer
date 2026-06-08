@@ -46,6 +46,12 @@ int main(int arg_c, char **arg_v) {
             printf("%s\n", e.what());
         }
 
+        float angle = 0.0f; //-(3.14159f / 4.0f); //45 degrees as radians
+        Mat4 model = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2);
+        Mat4 proj = Mat4::perspective(3.0f);
+        Mat4 viewport = Mat4::viewport(FRAME_WIDTH, FRAME_HEIGHT);
+        Mat4 transform = viewport * proj * model;
+
     for (size_t i = 0; i < obj.f_count; i++)
     {
         auto project = [&](Vec3 v) -> Vec3 {
@@ -55,23 +61,13 @@ int main(int arg_c, char **arg_v) {
             return {sx, sy, -v.z};
         };
 
-        Vec4 a4 = {obj.vertices[obj.faces[i].v0].x, obj.vertices[obj.faces[i].v0].y, obj.vertices[obj.faces[i].v0].z, 1};
-        Vec4 b4 = {obj.vertices[obj.faces[i].v1].x, obj.vertices[obj.faces[i].v1].y, obj.vertices[obj.faces[i].v1].z, 1};
-        Vec4 c4 = {obj.vertices[obj.faces[i].v2].x, obj.vertices[obj.faces[i].v2].y, obj.vertices[obj.faces[i].v2].z, 1};
+        Vec4 a4 = transform * Vec4{obj.vertices[obj.faces[i].v0].x, obj.vertices[obj.faces[i].v0].y, obj.vertices[obj.faces[i].v0].z, 1};
+        Vec4 b4 = transform * Vec4{obj.vertices[obj.faces[i].v1].x, obj.vertices[obj.faces[i].v1].y, obj.vertices[obj.faces[i].v1].z, 1};
+        Vec4 c4 = transform * Vec4{obj.vertices[obj.faces[i].v2].x, obj.vertices[obj.faces[i].v2].y, obj.vertices[obj.faces[i].v2].z, 1};
 
-        float angle = -(3.14159f / 4.0f); //45 degrees as radians
-
-        a4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * a4;
-        b4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * b4;
-        c4 = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2) * c4;
-
-        Vec3 a = {a4.x, a4.y, a4.z};
-        Vec3 b = {b4.x, b4.y, b4.z};
-        Vec3 c = {c4.x, c4.y, c4.z};
-
-        Vec3 v0 = project(a);
-        Vec3 v1 = project(b);
-        Vec3 v2 = project(c);
+        Vec3 v0 = {a4.x/a4.w, a4.y/a4.w, a4.z/a4.w};
+        Vec3 v1 = {b4.x/b4.w, b4.y/b4.w, b4.z/b4.w};
+        Vec3 v2 = {c4.x/c4.w, c4.y/c4.w, c4.z/c4.w};
 
         Vec2 uv0 = obj.UV_coords[obj.UV_faces[i].v0];
         Vec2 uv1 = obj.UV_coords[obj.UV_faces[i].v1];
@@ -79,10 +75,9 @@ int main(int arg_c, char **arg_v) {
         
         // Switched input order of vertices to get correct vertex winding because screen space Y is pointing down, mirroring winding
         // Revert to original order when viewport transform is implemented, where we'll flip Y
-        draw_textured_triangle(frame_buffer, depth_buffer, FRAME_WIDTH, FRAME_HEIGHT, v2, v1, v0, uv0, uv1, uv2, tex);
+        draw_textured_triangle(frame_buffer, depth_buffer, FRAME_WIDTH, FRAME_HEIGHT, v0, v1, v2, uv0, uv1, uv2, tex);
     }
     
-
     // Main loop
     mfb_update_state state;
     do {        

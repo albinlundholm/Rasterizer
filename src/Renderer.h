@@ -1,8 +1,9 @@
 #pragma once
+#include <cstdint>
+
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Texture.h"
-#include <cstdint>
 
 void draw_line(uint32_t *frame_buffer, int frame_width, int frame_height, Vec2 start, Vec2 end, uint32_t color);
 

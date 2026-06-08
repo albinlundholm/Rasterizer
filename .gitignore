@@ -1,3 +1,5 @@
 build/
+build-ninja/
 compile_commands.json
+.clangd
 .claude/

@@ -1,10 +1,10 @@
-#include "ObjLoader.h"
-#include "Vec3.h"
-#include "Mesh.h"
-
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+
+#include "ObjLoader.h"
+#include "Vec3.h"
+#include "Mesh.h"
 
 Mesh load_obj(char *path){
     std::ifstream file(path);

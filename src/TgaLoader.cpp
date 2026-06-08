@@ -1,8 +1,8 @@
-#include "TgaLoader.h"
-#include "Texture.h"
-
 #include <fstream>
 #include <stdexcept>
+
+#include "TgaLoader.h"
+#include "Texture.h"
 
 Texture load_tga(char *path)
 {
