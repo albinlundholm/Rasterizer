@@ -121,19 +121,20 @@ void draw_shaded_triangle(uint32_t *frame_buffer, float * depth_buffer, int fram
         for (int x = (int)x_min; x <= (int)x_max; x++)
         {
             // Find barycentric coords for point to interpolate color
+            // w_i = weight of vertex i (named w_i here since b0..b2 hold the blue channels)
             Vec2 P = {(float)x, (float)y};
-            float u = (v2_1-v2_0).cross(P-v2_0) / denom;
-            float v = (P-v2_0).cross(v2_2-v2_0) / denom;
-            float w = 1 - u - v;
+            float w1 = (P-v2_0).cross(v2_2-v2_0) / denom;
+            float w2 = (v2_1-v2_0).cross(P-v2_0) / denom;
+            float w0 = 1 - w1 - w2;
 
-            float z = u * v0.z + v * v1.z + w * v2.z;
+            float z = w0 * v0.z + w1 * v1.z + w2 * v2.z;
 
-            if (z < depth_buffer[(size_t)y * frame_width + x])
+            if (z > depth_buffer[(size_t)y * frame_width + x])
             {
-                if (u >= 0 && v >= 0 && w >= 0){
-                    uint8_t r = (uint8_t)(u*r0 + v*r1 + w*r2);
-                    uint8_t g = (uint8_t)(u*g0 + v*g1 + w*g2);
-                    uint8_t b = (uint8_t)(u*b0 + v*b1 + w*b2);
+                if (w0 >= 0 && w1 >= 0 && w2 >= 0){
+                    uint8_t r = (uint8_t)(w0*r0 + w1*r1 + w2*r2);
+                    uint8_t g = (uint8_t)(w0*g0 + w1*g1 + w2*g2);
+                    uint8_t b = (uint8_t)(w0*b0 + w1*b1 + w2*b2);
                     uint32_t blended = (r << 16) | (g << 8) | b;
                     frame_buffer[(size_t)y * frame_width + x] = blended;
                     depth_buffer[(size_t)y * frame_width + x] = z;
@@ -165,25 +166,26 @@ void draw_textured_triangle(uint32_t *frame_buffer, float *depth_buffer, int fra
 
     float denom = (v2_1-v2_0).cross(v2_2-v2_0);
     
-    if (denom <= 0) return;
+    if (denom >= 0) return;
 
     for (int y = (int)y_min; y <= (int)y_max; y++)
     {
         for (int x = (int)x_min; x <= (int)x_max; x++)
         {
             // Find barycentric coords for point
+            // b_i = weight of vertex i = signed area of the sub-triangle opposite vertex i / total area
             Vec2 P = {(float)x, (float)y};
-            float u = (v2_1-v2_0).cross(P-v2_0) / denom;
-            float v = (P-v2_0).cross(v2_2-v2_0) / denom;
-            float w = 1 - u - v;
+            float b1 = (P-v2_0).cross(v2_2-v2_0) / denom;
+            float b2 = (v2_1-v2_0).cross(P-v2_0) / denom;
+            float b0 = 1 - b1 - b2;
 
-            float z = u * v0.z + v * v1.z + w * v2.z;
+            float z = b0 * v0.z + b1 * v1.z + b2 * v2.z;
 
-            if (u >= 0 && v >= 0 && w >= 0)
+            if (b0 >= 0 && b1 >= 0 && b2 >= 0)
             {
-                if (z < depth_buffer[(size_t)y * frame_width + x]){
-                    float tex_u = u * uv0.x + v * uv1.x + w * uv2.x;
-                    float tex_v = u * uv0.y + v * uv1.y + w * uv2.y;
+                if (z > depth_buffer[(size_t)y * frame_width + x]){
+                    float tex_u = b0 * uv0.x + b1 * uv1.x + b2 * uv2.x;
+                    float tex_v = b0 * uv0.y + b1 * uv1.y + b2 * uv2.y;
 
                     int tx = (int)(tex_u * texture.width);
                     int ty = (int)(tex_v * texture.height);

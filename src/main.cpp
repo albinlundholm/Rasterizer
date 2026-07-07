@@ -33,7 +33,7 @@ int main(int arg_c, char **arg_v) {
     float *depth_buffer = (float *)malloc(FRAME_WIDTH*FRAME_HEIGHT*sizeof(float));
     for (size_t i = 0; i < FRAME_WIDTH*FRAME_HEIGHT; i++)
         {
-            depth_buffer[i] = FLT_MAX;
+            depth_buffer[i] = -FLT_MAX;
         }
 
     // Test load and draw obj wireframe
@@ -46,9 +46,9 @@ int main(int arg_c, char **arg_v) {
             printf("%s\n", e.what());
         }
 
-        float angle = 0.0f; //-(3.14159f / 4.0f); //45 degrees as radians
+        float angle = -(3.14159f / 4.0f); //45 degrees as radians
         Mat4 model = Mat4::rotation_y(angle) * Mat4::rotation_z(angle/2) * Mat4::rotation_x(-angle/2);
-        Mat4 proj = Mat4::perspective(3.0f);
+        Mat4 proj = Mat4::perspective(6.0f);
         Mat4 viewport = Mat4::viewport(FRAME_WIDTH, FRAME_HEIGHT);
         Mat4 transform = viewport * proj * model;
 
@@ -72,9 +72,7 @@ int main(int arg_c, char **arg_v) {
         Vec2 uv0 = obj.UV_coords[obj.UV_faces[i].v0];
         Vec2 uv1 = obj.UV_coords[obj.UV_faces[i].v1];
         Vec2 uv2 = obj.UV_coords[obj.UV_faces[i].v2];
-        
-        // Switched input order of vertices to get correct vertex winding because screen space Y is pointing down, mirroring winding
-        // Revert to original order when viewport transform is implemented, where we'll flip Y
+
         draw_textured_triangle(frame_buffer, depth_buffer, FRAME_WIDTH, FRAME_HEIGHT, v0, v1, v2, uv0, uv1, uv2, tex);
     }
     
