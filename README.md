@@ -1,6 +1,6 @@
 # Software Rasterizer
 
-A software rasterizer written from scratch in C++ - 3D rendering on the CPU, no GPU or graphics API.
+A 3D software rasterizer written from scratch in C++, rendering entirely on the CPU without using a GPU or graphics API.
 
 ## Features
 - Triangle rasterization
@@ -14,4 +14,4 @@ A software rasterizer written from scratch in C++ - 3D rendering on the CPU, no 
 ```
 
 ## Status
-Work in progress. A more detailed write-up is coming.
+Work in progress.
